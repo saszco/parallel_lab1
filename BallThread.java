@@ -2,17 +2,28 @@ package lab1;
 
 public class BallThread extends Thread {
     private Ball b;
+    private BallCanvas canvas;
+    private BounceFrame frame;
 
-    public BallThread(Ball ball) {
-        b = ball;
+    public BallThread(Ball ball, BallCanvas canvas, BounceFrame frame) {
+        this.b = ball;
+        this.canvas = canvas;
+        this.frame = frame;
     }
 
     @Override
     public void run() {
         try {
-            for (int i = 1; i < 10000; i++) {
+            while (true) {
                 b.move();
-                System.out.println("Thread name = " + Thread.currentThread().getName());
+
+                if (canvas.isBallInHole(b)) {
+                    System.out.println("Ball in hole. Closed Thread name = " + Thread.currentThread().getName());
+                    canvas.remove(b);
+                    frame.incrementBallsInHole();
+                    return;
+                }
+
                 Thread.sleep(5);
             }
         } catch (InterruptedException ex) {

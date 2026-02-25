@@ -58,4 +58,11 @@ public class Ball {
         this.canvas.repaint();
     }
 
+    public int getCenterX() {
+        return x + XSIZE / 2;
+    }
+
+    public int getCenterY() {
+        return y + YSIZE / 2;
+    }
 }
