@@ -1,27 +1,23 @@
 package lab1;
 
-import javax.swing.JFrame;
-import java.awt.Container;
-import java.awt.BorderLayout;
-import java.awt.Color;
-import javax.swing.JPanel;
-import javax.swing.JButton;
-import javax.swing.JTextField;
-import java.awt.event.ActionListener;
-import java.awt.event.ActionEvent;
-import javax.swing.SwingUtilities;
+import javax.swing.*;
+import java.awt.*;
+import java.awt.event.*;
+import java.util.ArrayList;
+import java.util.List;
 
 public class BounceFrame extends JFrame {
     private BallCanvas canvas;
     public static final int WIDTH = 450;
     public static final int HEIGHT = 350;
 
-    private int ballsInHoleCount = 0;
-    private JTextField counterField;
+    private static final int START_X = 55;
+    private static final int START_Y = 100;
+    private static final int BLUE_COUNT = 50;
 
     public BounceFrame() {
         this.setSize(WIDTH, HEIGHT);
-        this.setTitle("Bounce programm");
+        this.setTitle("Bounce — Priority experiment");
 
         this.canvas = new BallCanvas();
         Container content = this.getContentPane();
@@ -30,45 +26,71 @@ public class BounceFrame extends JFrame {
         JPanel buttonPanel = new JPanel();
         buttonPanel.setBackground(Color.lightGray);
 
-        JButton buttonStart = new JButton("Start");
-        JButton buttonStop = new JButton("Stop");
+        JButton btnRed = new JButton("Red (HIGH)");
+        JButton btnBlue = new JButton("Blue (LOW)");
+        JButton btnExperiment = new JButton("Experiment (1 RED + 50 BLUE)");
+        JButton btnStop = new JButton("Stop");
 
-        counterField = new JTextField(10);
-        counterField.setEditable(false);
-        counterField.setText("В лузі: 0");
-
-        buttonStart.addActionListener(new ActionListener() {
+        btnRed.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                Ball b = new Ball(canvas);
+                Ball b = new Ball(canvas, Color.RED, START_X, START_Y);
                 canvas.add(b);
-
-                BallThread thread = new BallThread(b, canvas, BounceFrame.this);
-                thread.start();
+                BallThread t = new BallThread(b, Thread.MIN_PRIORITY);
+                t.start();
+                System.out.println("RED thread: " + t.getName() + " | priority: " + t.getPriority());
             }
         });
 
-        buttonStop.addActionListener(new ActionListener() {
+        btnBlue.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                Ball b = new Ball(canvas, Color.BLUE, START_X, START_Y);
+                canvas.add(b);
+                BallThread t = new BallThread(b, Thread.MAX_PRIORITY);
+                t.start();
+                System.out.println("BLUE thread: " + t.getName() + " | priority: " + t.getPriority());
+            }
+        });
+
+        btnExperiment.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                btnExperiment.setEnabled(false); // не запускати двічі
+
+                List<BallThread> threads = new ArrayList<>();
+
+                Ball redBall = new Ball(canvas, Color.RED, START_X, START_Y);
+                canvas.add(redBall);
+                threads.add(new BallThread(redBall, Thread.MAX_PRIORITY));
+
+                for (int i = 0; i < BLUE_COUNT; i++) {
+                    Ball blueBall = new Ball(canvas, Color.BLUE, START_X, START_Y);
+                    canvas.add(blueBall);
+                    threads.add(new BallThread(blueBall, Thread.MIN_PRIORITY));
+                }
+
+                for (BallThread t : threads) {
+                    t.start();
+                }
+
+                System.out.println("Started: 1 RED (priority=10) + "
+                        + BLUE_COUNT + " BLUE (priority=1)");
+            }
+        });
+
+        btnStop.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
                 System.exit(0);
             }
         });
 
-        buttonPanel.add(buttonStart);
-        buttonPanel.add(buttonStop);
-        buttonPanel.add(counterField);
+        buttonPanel.add(btnRed);
+        buttonPanel.add(btnBlue);
+        buttonPanel.add(btnExperiment);
+        buttonPanel.add(btnStop);
 
         content.add(buttonPanel, BorderLayout.SOUTH);
-    }
-
-    public void incrementBallsInHole() {
-        ballsInHoleCount++;
-        SwingUtilities.invokeLater(new Runnable() {
-            @Override
-            public void run() {
-                counterField.setText("В лузі: " + ballsInHoleCount);
-            }
-        });
     }
 }

@@ -1,6 +1,5 @@
 package lab1;
 
-import java.util.Random;
 import java.awt.Component;
 import java.awt.Graphics2D;
 import java.awt.Color;
@@ -14,25 +13,24 @@ public class Ball {
     private int y = 0;
     private int dx = 2;
     private int dy = 2;
+    private Color color;
 
-    public Ball(Component c) {
+    public Ball(Component c, Color color) {
         this.canvas = c;
-
-        if (Math.random() < 0.5) {
-            x = new Random().nextInt(this.canvas.getWidth());
-            y = 0;
-        } else {
-            x = 0;
-            y = new Random().nextInt(this.canvas.getHeight());
-        }
+        this.color = color;
+        x = c.getWidth() / 2;
+        y = c.getHeight() / 2;
     }
 
-    public static void f() {
-        int a = 0;
+    public Ball(Component c, Color color, int startX, int startY) {
+        this.canvas = c;
+        this.color = color;
+        this.x = startX;
+        this.y = startY;
     }
 
     public void draw(Graphics2D g2) {
-        g2.setColor(Color.darkGray);
+        g2.setColor(color);
         g2.fill(new Ellipse2D.Double(x, y, XSIZE, YSIZE));
     }
 
@@ -43,19 +41,19 @@ public class Ball {
             x = 0;
             dx = -dx;
         }
-        if (x + XSIZE >= this.canvas.getWidth()) {
-            x = this.canvas.getWidth() - XSIZE;
+        if (x + XSIZE >= canvas.getWidth()) {
+            x = canvas.getWidth() - XSIZE;
             dx = -dx;
         }
         if (y < 0) {
             y = 0;
             dy = -dy;
         }
-        if (y + YSIZE >= this.canvas.getHeight()) {
-            y = this.canvas.getHeight() - YSIZE;
+        if (y + YSIZE >= canvas.getHeight()) {
+            y = canvas.getHeight() - YSIZE;
             dy = -dy;
         }
-        this.canvas.repaint();
+        canvas.repaint();
     }
 
     public int getCenterX() {
